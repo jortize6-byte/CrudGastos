@@ -2,68 +2,65 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 
-namespace CrudGastos
+namespace Gimnasio
 {
-    public class GastoRepositorio
+    public class SocioRepositorio
     {
         private const string CadenaConexion =
             @"Server=(localdb)\MSSQLLocalDB;" +
-            @"Database=GastosDB;" +
+            @"Database=GimnasioDB;" +
             @"Trusted_Connection=True;" +
             @"TrustServerCertificate=True;";
 
-        public void Insertar(Gasto g)
+        public void Insertar(Socio s)
         {
-            string sql = @"INSERT INTO Gastos (Descripcion, Monto, Categoria)
-                           VALUES (@descripcion, @monto, @categoria)";
+            string sql = @"INSERT INTO Socios (Nombre, Cuota, Membresia)
+                           VALUES (@nombre, @cuota, @membresia)";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             using (SqlCommand comando = new SqlCommand(sql, conexion))
             {
-                comando.Parameters.AddWithValue("@descripcion", g.Descripcion);
-                comando.Parameters.AddWithValue("@monto", g.Monto);
-                comando.Parameters.AddWithValue("@categoria", g.Categoria);
+                comando.Parameters.AddWithValue("@nombre", s.Nombre);
+                comando.Parameters.AddWithValue("@cuota", s.Cuota);
+                comando.Parameters.AddWithValue("@membresia", s.Membresia);
 
                 conexion.Open();
                 comando.ExecuteNonQuery();
             }
         }
 
-        public List<Gasto> ListarTodos()
+        public List<Socio> ListarTodos()
         {
-            List<Gasto> lista = new List<Gasto>();
-
-            string sql = @"SELECT Id, Descripcion, Monto, Categoria
-                           FROM Gastos
+            List<Socio> lista = new List<Socio>();
+            string sql = @"SELECT Id, Nombre, Cuota, Membresia
+                           FROM Socios
                            ORDER BY Id";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             using (SqlCommand comando = new SqlCommand(sql, conexion))
             {
                 conexion.Open();
-
                 using (SqlDataReader lector = comando.ExecuteReader())
                 {
                     while (lector.Read())
                     {
-                        lista.Add(new Gasto
+                        lista.Add(new Socio
                         {
                             Id = lector.GetInt32(0),
-                            Descripcion = lector.GetString(1),
-                            Monto = lector.GetDecimal(2),
-                            Categoria = lector.GetString(3)
+                            Nombre = lector.GetString(1),
+                            Cuota = lector.GetDecimal(2),
+                            Membresia = lector.GetString(3)
                         });
                     }
                 }
             }
-
             return lista;
         }
 
-        public Gasto? BuscarPorId(int id)
+        public Socio? BuscarPorId(int id)
         {
-            string sql = @"SELECT Id, Descripcion, Monto, Categoria
-                           FROM Gastos
+            string sql = @"SELECT Id, Nombre, Cuota, Membresia
+                           FROM Socios
                            WHERE Id = @id";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
@@ -76,51 +73,46 @@ namespace CrudGastos
                 {
                     if (lector.Read())
                     {
-                        return new Gasto
+                        return new Socio
                         {
                             Id = lector.GetInt32(0),
-                            Descripcion = lector.GetString(1),
-                            Monto = lector.GetDecimal(2),
-                            Categoria = lector.GetString(3)
+                            Nombre = lector.GetString(1),
+                            Cuota = lector.GetDecimal(2),
+                            Membresia = lector.GetString(3)
                         };
                     }
                 }
             }
-
             return null;
         }
 
-        public bool Actualizar(Gasto g)
+        public bool Actualizar(Socio s)
         {
-            string sql = @"UPDATE Gastos
-                           SET Monto = @monto
+            string sql = @"UPDATE Socios
+                           SET Cuota = @cuota
                            WHERE Id = @id";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             using (SqlCommand comando = new SqlCommand(sql, conexion))
             {
-                comando.Parameters.AddWithValue("@monto", g.Monto);
-                comando.Parameters.AddWithValue("@id", g.Id);
+                comando.Parameters.AddWithValue("@cuota", s.Cuota);
+                comando.Parameters.AddWithValue("@id", s.Id);
 
                 conexion.Open();
-                int filas = comando.ExecuteNonQuery();
-                return filas == 1;
+                return comando.ExecuteNonQuery() == 1;
             }
         }
 
         public bool Eliminar(int id)
         {
-            string sql = @"DELETE FROM Gastos
-                           WHERE Id = @id";
+            string sql = @"DELETE FROM Socios WHERE Id = @id";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             using (SqlCommand comando = new SqlCommand(sql, conexion))
             {
                 comando.Parameters.AddWithValue("@id", id);
-
                 conexion.Open();
-                int filas = comando.ExecuteNonQuery();
-                return filas == 1;
+                return comando.ExecuteNonQuery() == 1;
             }
         }
     }

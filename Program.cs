@@ -2,76 +2,59 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 
-namespace CrudGastos
+namespace Gimnasio
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            GastoRepositorio repo = new GastoRepositorio();
+            SocioRepositorio repo = new SocioRepositorio();
             int opcion;
 
             do
             {
                 Console.WriteLine();
-                Console.WriteLine("===== CRUD DE GASTOS =====");
-                Console.WriteLine("1. Registrar gasto");
-                Console.WriteLine("2. Listar gastos");
-                Console.WriteLine("3. Buscar gasto por Id");
-                Console.WriteLine("4. Actualizar monto");
-                Console.WriteLine("5. Eliminar gasto");
+                Console.WriteLine("===== CRUD DE SOCIOS =====");
+                Console.WriteLine("1. Registrar socio");
+                Console.WriteLine("2. Listar socios");
+                Console.WriteLine("3. Buscar socio por Id");
+                Console.WriteLine("4. Actualizar cuota");
+                Console.WriteLine("5. Eliminar socio");
                 Console.WriteLine("6. Salir");
-                Console.Write("Elija una de las 6  opción: ");
+                Console.Write("Elija una opción: ");
 
-                string entrada = Console.ReadLine() ?? "";
-                if (!int.TryParse(entrada, out opcion))
-                {
+                if (!int.TryParse(Console.ReadLine(), out opcion))
                     opcion = -1;
-                }
 
                 switch (opcion)
                 {
-                    case 1:
-                        RegistrarGasto(repo);
-                        break;
-                    case 2:
-                        ListarGastos(repo);
-                        break;
-                    case 3:
-                        BuscarGasto(repo);
-                        break;
-                    case 4:
-                        ActualizarMonto(repo);
-                        break;
-                    case 5:
-                        EliminarGasto(repo);
-                        break;
-                    case 6:
-                        Console.WriteLine("Saliendo del programa...");
-                        break;
-                    default:
-                        Console.WriteLine("Opción no válida no es una de las 6 opciones.");
-                        break;
+                    case 1: Registrar(repo); break;
+                    case 2: Listar(repo); break;
+                    case 3: Buscar(repo); break;
+                    case 4: Actualizar(repo); break;
+                    case 5: Eliminar(repo); break;
+                    case 6: Console.WriteLine("Saliendo del programa..."); break;
+                    default: Console.WriteLine("Opción no válida."); break;
                 }
 
             } while (opcion != 6);
         }
 
-        private static void RegistrarGasto(GastoRepositorio repo)
+        private static void Registrar(SocioRepositorio repo)
         {
-            Console.Write("Descripción: ");
-            string descripcion = Console.ReadLine() ?? "";
+            Console.Write("Nombre: ");
+            string nombre = Console.ReadLine()?.Trim() ?? "";
 
-            Console.Write("Monto: ");
-            string montoTexto = Console.ReadLine() ?? "";
+            Console.Write("Membresía: ");
+            string membresia = Console.ReadLine()?.Trim() ?? "";
 
-            Console.Write("Categoría: ");
-            string categoria = Console.ReadLine() ?? "";
+            Console.Write("Cuota: ");
+            string cuotaTexto = Console.ReadLine() ?? "";
 
-            if (string.IsNullOrWhiteSpace(descripcion) ||
-                string.IsNullOrWhiteSpace(categoria) ||
-                !decimal.TryParse(montoTexto, out decimal monto) ||
-                monto <= 0)
+            if (string.IsNullOrWhiteSpace(nombre) ||
+                string.IsNullOrWhiteSpace(membresia) ||
+                !decimal.TryParse(cuotaTexto, out decimal cuota) ||
+                cuota <= 0)
             {
                 Console.WriteLine("Datos inválidos.");
                 return;
@@ -79,15 +62,15 @@ namespace CrudGastos
 
             try
             {
-                Gasto nuevo = new Gasto
+                Socio nuevo = new Socio
                 {
-                    Descripcion = descripcion.Trim(),
-                    Monto = monto,
-                    Categoria = categoria.Trim()
+                    Nombre = nombre,
+                    Cuota = cuota,
+                    Membresia = membresia
                 };
 
                 repo.Insertar(nuevo);
-                Console.WriteLine("Gasto registrado.");
+                Console.WriteLine("Socio registrado.");
             }
             catch (SqlException ex)
             {
@@ -95,26 +78,26 @@ namespace CrudGastos
             }
         }
 
-        private static void ListarGastos(GastoRepositorio repo)
+        private static void Listar(SocioRepositorio repo)
         {
             try
             {
-                List<Gasto> gastos = repo.ListarTodos();
+                List<Socio> lista = repo.ListarTodos();
 
-                if (gastos.Count == 0)
+                if (lista.Count == 0)
                 {
-                    Console.WriteLine("No hay gastos registrados.");
+                    Console.WriteLine("No hay socios registrados.");
                     return;
                 }
 
                 decimal total = 0;
-                foreach (Gasto g in gastos)
+                foreach (Socio s in lista)
                 {
-                    Console.WriteLine(g.ToString());
-                    total += g.Monto;
+                    Console.WriteLine(s);
+                    total += s.Cuota;
                 }
 
-                Console.WriteLine($"TOTAL GASTADO: Q {total:N2}");
+                Console.WriteLine($"TOTAL CUOTAS: Q {total:N2}");
             }
             catch (SqlException ex)
             {
@@ -122,12 +105,10 @@ namespace CrudGastos
             }
         }
 
-        private static void BuscarGasto(GastoRepositorio repo)
+        private static void Buscar(SocioRepositorio repo)
         {
-            Console.Write("Id del gasto: ");
-            string idTexto = Console.ReadLine() ?? "";
-
-            if (!int.TryParse(idTexto, out int id))
+            Console.Write("Id del socio: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("Id inválido.");
                 return;
@@ -135,12 +116,12 @@ namespace CrudGastos
 
             try
             {
-                Gasto? gasto = repo.BuscarPorId(id);
+                Socio? socio = repo.BuscarPorId(id);
 
-                if (gasto == null)
+                if (socio == null)
                     Console.WriteLine("No existe ese Id.");
                 else
-                    Console.WriteLine(gasto.ToString());
+                    Console.WriteLine(socio);
             }
             catch (SqlException ex)
             {
@@ -148,12 +129,10 @@ namespace CrudGastos
             }
         }
 
-        private static void ActualizarMonto(GastoRepositorio repo)
+        private static void Actualizar(SocioRepositorio repo)
         {
-            Console.Write("Id del gasto: ");
-            string idTexto = Console.ReadLine() ?? "";
-
-            if (!int.TryParse(idTexto, out int id))
+            Console.Write("Id del socio: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("Id inválido.");
                 return;
@@ -161,31 +140,29 @@ namespace CrudGastos
 
             try
             {
-                Gasto? gasto = repo.BuscarPorId(id);
+                Socio? socio = repo.BuscarPorId(id);
 
-                if (gasto == null)
+                if (socio == null)
                 {
                     Console.WriteLine("No existe ese Id.");
                     return;
                 }
 
-                Console.WriteLine($"Gasto actual: {gasto}");
-                Console.Write("Nuevo monto: ");
-                string montoTexto = Console.ReadLine() ?? "";
+                Console.WriteLine($"Socio actual: {socio}");
+                Console.Write("Nueva cuota: ");
 
-                if (!decimal.TryParse(montoTexto, out decimal nuevoMonto) || nuevoMonto <= 0)
+                if (!decimal.TryParse(Console.ReadLine(), out decimal nuevaCuota) || nuevaCuota <= 0)
                 {
-                    Console.WriteLine("Monto inválido.");
+                    Console.WriteLine("Cuota inválida.");
                     return;
                 }
 
-                gasto.Monto = nuevoMonto;
-                bool ok = repo.Actualizar(gasto);
+                socio.Cuota = nuevaCuota;
 
-                if (ok)
-                    Console.WriteLine("Gasto actualizado correctamente.");
+                if (repo.Actualizar(socio))
+                    Console.WriteLine("Cuota actualizada.");
                 else
-                    Console.WriteLine("No existe ese Id.");
+                    Console.WriteLine("No se pudo actualizar.");
             }
             catch (SqlException ex)
             {
@@ -193,12 +170,10 @@ namespace CrudGastos
             }
         }
 
-        private static void EliminarGasto(GastoRepositorio repo)
+        private static void Eliminar(SocioRepositorio repo)
         {
-            Console.Write("Id del gasto: ");
-            string idTexto = Console.ReadLine() ?? "";
-
-            if (!int.TryParse(idTexto, out int id))
+            Console.Write("Id del socio: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("Id inválido.");
                 return;
@@ -206,10 +181,8 @@ namespace CrudGastos
 
             try
             {
-                bool ok = repo.Eliminar(id);
-
-                if (ok)
-                    Console.WriteLine("Gasto eliminado correctamente.");
+                if (repo.Eliminar(id))
+                    Console.WriteLine("Socio eliminado.");
                 else
                     Console.WriteLine("No existe ese Id.");
             }
